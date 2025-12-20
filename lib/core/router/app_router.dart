@@ -4,12 +4,15 @@ import 'package:temporal_zodiac/core/presentation/widgets/bottom_nav_scaffold.da
 import 'package:temporal_zodiac/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:temporal_zodiac/features/auth/presentation/pages/login_page.dart';
 import 'package:temporal_zodiac/features/auth/presentation/pages/signup_page.dart';
+import 'package:temporal_zodiac/features/auth/presentation/pages/profile_page.dart';
 import 'package:temporal_zodiac/features/auth/presentation/providers/auth_provider.dart';
 import 'package:temporal_zodiac/features/chat/presentation/pages/chat_page.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:temporal_zodiac/features/home/presentation/pages/home_page.dart';
+import 'package:temporal_zodiac/features/map/presentation/pages/global_map_page.dart';
 import 'package:temporal_zodiac/features/home/presentation/pages/place_details_page.dart';
 import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
+import 'package:temporal_zodiac/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:temporal_zodiac/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:temporal_zodiac/core/services/preferences_service.dart';
 
@@ -19,17 +22,21 @@ final GlobalKey<NavigatorState> _rootNavigatorKey =
 GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/splash',
     refreshListenable: authProvider,
     redirect: (context, state) async {
       final isOnboardingCompleted = await prefs.isOnboardingCompleted();
       final isLoggedIn = authProvider.isAuthenticated;
       
+      final isGoingToSplash = state.matchedLocation == '/splash';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToForgotPassword = state.matchedLocation == '/forgot_password';
       
+      // 0. Always allow splash to run its course first
+      if (isGoingToSplash) return null;
+
       // 1. If onboarding not completed, go to onboarding
       if (!isOnboardingCompleted) {
         if (!isGoingToOnboarding) return '/onboarding';
@@ -52,7 +59,11 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
       return null;
     },
     routes: [
-         GoRoute(
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingPage(),
       ),
@@ -93,6 +104,14 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/map',
+                builder: (context, state) => const GlobalMapPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/chat',
                 builder: (context, state) => const ChatPage(),
               ),
@@ -103,6 +122,14 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
               GoRoute(
                 path: '/favorites',
                 builder: (context, state) => const FavoritesPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfilePage(),
               ),
             ],
           ),

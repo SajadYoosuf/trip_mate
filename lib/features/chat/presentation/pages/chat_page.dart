@@ -78,7 +78,7 @@ class _ChatPageState extends State<ChatPage> {
               color: Theme.of(context).scaffoldBackgroundColor,
               border: Border(
                 top: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
               ),
             ),
             child: SafeArea( // Ensure input does not go behind home indicator
@@ -99,7 +99,7 @@ class _ChatPageState extends State<ChatPage> {
                         fillColor: Theme.of(context)
                             .colorScheme
                             .surfaceContainerHighest
-                            .withOpacity(0.5),
+                            .withValues(alpha: 0.5),
                         contentPadding:
                             const EdgeInsets.symmetric(horizontal: 20),
                       ),

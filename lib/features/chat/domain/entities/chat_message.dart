@@ -17,4 +17,22 @@ class ChatMessage extends Equatable {
 
   @override
   List<Object?> get props => [id, text, role, timestamp];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'text': text,
+      'role': role.index,
+      'timestamp': timestamp.toIso8601String(),
+    };
+  }
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      id: json['id'],
+      text: json['text'],
+      role: MessageRole.values[json['role']],
+      timestamp: DateTime.parse(json['timestamp']),
+    );
+  }
 }

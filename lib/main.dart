@@ -4,12 +4,14 @@ import 'package:temporal_zodiac/core/router/app_router.dart';
 import 'package:temporal_zodiac/core/services/preferences_service.dart';
 import 'package:temporal_zodiac/core/theme/app_theme.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:temporal_zodiac/features/auth/data/repositories/mock_auth_repository_impl.dart';
+import 'package:temporal_zodiac/features/auth/data/repositories/firebase_auth_repository_impl.dart';
 import 'package:temporal_zodiac/features/auth/presentation/providers/auth_provider.dart';
 import 'package:temporal_zodiac/features/home/data/repositories/mock_place_repository_impl.dart';
 import 'package:temporal_zodiac/features/home/domain/repositories/place_repository.dart';
+import 'package:temporal_zodiac/features/home/data/repositories/google_places_repository_impl.dart';
+import 'package:temporal_zodiac/features/home/domain/repositories/places_repository.dart';
 import 'package:temporal_zodiac/features/home/presentation/providers/home_provider.dart';
-import 'package:temporal_zodiac/features/chat/data/repositories/mock_chat_repository_impl.dart';
+import 'package:temporal_zodiac/features/chat/data/repositories/gemini_chat_repository_impl.dart';
 import 'package:temporal_zodiac/features/chat/domain/repositories/chat_repository.dart';
 import 'package:temporal_zodiac/features/chat/presentation/providers/chat_provider.dart';
 import 'package:temporal_zodiac/features/favorites/data/models/place_hive_model.dart';
@@ -19,19 +21,28 @@ import 'package:temporal_zodiac/features/favorites/presentation/providers/favori
 import 'package:temporal_zodiac/features/favorites/data/repositories/recents_repository_impl.dart';
 import 'package:temporal_zodiac/features/favorites/domain/repositories/recents_repository.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/recents_provider.dart';
+import 'package:temporal_zodiac/features/favorites/data/repositories/visited_repository_impl.dart';
+import 'package:temporal_zodiac/features/favorites/domain/repositories/visited_repository.dart';
+import 'package:temporal_zodiac/features/favorites/presentation/providers/visited_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
   // Initialize Hive
   await Hive.initFlutter();
   Hive.registerAdapter(PlaceHiveModelAdapter());
   final favoritesBox = await Hive.openBox<PlaceHiveModel>('favorites');
   final recentsBox = await Hive.openBox<PlaceHiveModel>('recents');
+  final visitedBox = await Hive.openBox<PlaceHiveModel>('visited');
 
   // Initialize Services & Repositories
   final preferencesService = PreferencesService();
-  final authRepository = MockAuthRepositoryImpl();
+  final authRepository = FirebaseAuthRepositoryImpl();
   final authProvider = AuthProvider(
     repository: authRepository,
     preferencesService: preferencesService,
@@ -43,6 +54,7 @@ void main() async {
   runApp(TravelMateApp(
     favoritesBox: favoritesBox,
     recentsBox: recentsBox,
+    visitedBox: visitedBox,
     authProvider: authProvider,
     preferencesService: preferencesService,
   ));
@@ -51,6 +63,7 @@ void main() async {
 class TravelMateApp extends StatelessWidget {
   final Box<PlaceHiveModel> favoritesBox;
   final Box<PlaceHiveModel> recentsBox;
+  final Box<PlaceHiveModel> visitedBox;
   final AuthProvider authProvider;
   final PreferencesService preferencesService;
 
@@ -58,6 +71,7 @@ class TravelMateApp extends StatelessWidget {
     super.key,
     required this.favoritesBox,
     required this.recentsBox,
+    required this.visitedBox,
     required this.authProvider,
     required this.preferencesService,
   });
@@ -68,7 +82,8 @@ class TravelMateApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: authProvider),
         Provider<PlaceRepository>(create: (_) => MockPlaceRepositoryImpl()),
-        Provider<ChatRepository>(create: (_) => MockChatRepositoryImpl()),
+        Provider<PlacesRepository>(create: (_) => GooglePlacesRepositoryImpl()),
+        Provider<ChatRepository>(create: (_) => GeminiChatRepositoryImpl()),
         Provider<FavoritesRepository>(
             create: (_) => FavoritesRepositoryImpl(favoritesBox)),
         Provider<RecentsRepository>(
@@ -76,11 +91,13 @@ class TravelMateApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => HomeProvider(
             repository: context.read<PlaceRepository>(),
+            googlePlacesRepository: context.read<PlacesRepository>(),
           )..loadPlaces(),
         ),
         ChangeNotifierProvider(
           create: (context) => ChatProvider(
             repository: context.read<ChatRepository>(),
+            preferencesService: preferencesService,
           ),
         ),
         ChangeNotifierProvider(
@@ -92,6 +109,13 @@ class TravelMateApp extends StatelessWidget {
           create: (context) => RecentsProvider(
             repository: context.read<RecentsRepository>(),
           )..loadRecents(),
+        ),
+        Provider<VisitedRepository>(
+            create: (_) => VisitedRepositoryImpl(visitedBox)),
+        ChangeNotifierProvider(
+          create: (context) => VisitedProvider(
+            context.read<VisitedRepository>(),
+          )..loadVisitedPlaces(),
         ),
       ],
       child: MaterialApp.router(

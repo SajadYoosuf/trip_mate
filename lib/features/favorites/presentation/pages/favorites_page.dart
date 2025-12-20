@@ -37,7 +37,6 @@ class FavoritesPage extends StatelessWidget {
                     final place = provider.favorites[index];
                     return PlaceCard(
                       place: place,
-                      isHorizontal: false,
                       onTap: () {
                         context.read<RecentsProvider>().addRecent(place);
                          context.go('/home/details', extra: place);
@@ -60,7 +59,6 @@ class FavoritesPage extends StatelessWidget {
                     final place = provider.recents[index];
                     return PlaceCard(
                       place: place,
-                      isHorizontal: false,
                       onTap: () {
                          context.go('/home/details', extra: place);
                       },

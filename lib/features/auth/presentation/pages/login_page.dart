@@ -42,7 +42,18 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRViESYSRiXH7FGB8OspySANLtLpwqs9mP-gw&s",
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, size: 80, color: Colors.blue),
+                  ),
+                ),
+                const SizedBox(height: 30),
                 Text(
                   'Welcome Back!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(

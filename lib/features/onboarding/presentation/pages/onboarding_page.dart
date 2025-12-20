@@ -17,17 +17,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
     {
       "title": "Hidden Gems",
       "text": "Discover the most secluded and breathtaking tourist spots that typical guides miss.",
-      "image": "assets/images/hidden_gems.png", // Placeholder
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR73epIPJ2E6BmT_zX_likq09JX0V9JfdcViw&s",
     },
     {
       "title": "Secret Spots",
       "text": "Unlock exclusive access to secret locations known only to locals.",
-      "image": "assets/images/secret_spots.png", // Placeholder
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRViESYSRiXH7FGB8OspySANLtLpwqs9mP-gw&s",
     },
     {
       "title": "Adventure Awaits",
       "text": "Embark on a journey to find the undiscovered. Are you ready?",
-      "image": "assets/images/adventure.png", // Placeholder
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtEtsUskwsAA8AQmHkNx7JnTHx9yEmNMcwyA&s",
     },
   ];
 
@@ -77,6 +77,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 itemBuilder: (context, index) => OnboardingContent(
                   title: _onboardingData[index]['title']!,
                   text: _onboardingData[index]['text']!,
+                  image: _onboardingData[index]['image']!,
                 ),
               ),
             ),
@@ -146,11 +147,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
 class OnboardingContent extends StatelessWidget {
   final String title;
   final String text;
+  final String image;
 
   const OnboardingContent({
     super.key,
     required this.title,
     required this.text,
+    required this.image,
   });
 
   @override
@@ -158,10 +161,15 @@ class OnboardingContent extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(
-          Icons.map_rounded, // Placeholder icon
-          size: 100,
-          color: Colors.blueAccent,
+        ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.network(
+              image,
+              height: 300,
+              width: double.infinity,
+              fit: BoxFit.cover,
+               errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, size: 100, color: Colors.blueAccent),
+            ),
         ),
         const SizedBox(height: 40),
         Text(

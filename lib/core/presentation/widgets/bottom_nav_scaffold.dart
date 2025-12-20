@@ -12,45 +12,90 @@ class BottomNavScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true, // Allow body to extend behind the floating nav bar
       body: navigationShell,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.home_rounded,
-                color: navigationShell.currentIndex == 0
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
-              ),
-              onPressed: () => navigationShell.goBranch(0),
-              tooltip: 'Home',
-            ),
-            const SizedBox(width: 48), // Space for FAB
-            IconButton(
-              icon: Icon(
-                Icons.favorite_rounded,
-                color: navigationShell.currentIndex == 2
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
-              ),
-              onPressed: () => navigationShell.goBranch(2),
-              tooltip: 'Favorites',
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          height: 70,
+          margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNavItem(context, 0, Icons.home_rounded),
+              _buildNavItem(context, 1, Icons.map_rounded),
+              _buildCenterNavItem(context, 2, Icons.chat_bubble_outline),
+              _buildNavItem(context, 3, Icons.favorite_rounded),
+              _buildNavItem(context, 4, Icons.person_rounded),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-        onPressed: () => navigationShell.goBranch(1), // Chat is index 1
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, int index, IconData icon) {
+    final isSelected = navigationShell.currentIndex == index;
+    return GestureDetector(
+      onTap: () => navigationShell.goBranch(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) 
+              : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary 
+              : Colors.grey,
+          size: 24,
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+   Widget _buildCenterNavItem(BuildContext context, int index, IconData icon) {
+    final isSelected = navigationShell.currentIndex == index;
+    return GestureDetector(
+      onTap: () => navigationShell.goBranch(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+          color: isSelected 
+            ? Theme.of(context).colorScheme.primary 
+            : Theme.of(context).colorScheme.secondary,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: (isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary).withValues(alpha: 0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
     );
   }
 }

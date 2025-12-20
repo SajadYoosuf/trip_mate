@@ -23,17 +23,34 @@ class AuthProvider extends ChangeNotifier {
         _preferencesService = preferencesService;
 
   Future<void> checkAuthStatus() async {
-    final isLoggedIn = await _preferencesService.isLoggedIn();
-    if (isLoggedIn) {
-      final userData = await _preferencesService.getUserObj();
-      if (userData != null) {
-        // In a real app, we might fetch the user profile from ID or token.
-        // For now, reconstruct from preferences.
-        _currentUser = User(
-          id: 'persisted',
-          name: userData['name'] ?? '',
-          email: userData['email'] ?? '',
-        );
+    try {
+      final user = await _repository.getCurrentUser();
+      
+      _currentUser = user;
+      
+      // Update preferences if needed, or clear if user is null
+      if (user != null) {
+         await _preferencesService.setLoggedIn(true);
+         await _preferencesService.saveUserObj(user.name, user.email, user.photoUrl);
+      } else {
+         await _preferencesService.setLoggedIn(false);
+         await _preferencesService.clearUser();
+      }
+    } catch (e) {
+      // If network calls fail, try to restore from local storage
+      final isLoggedIn = await _preferencesService.isLoggedIn();
+      if (isLoggedIn) {
+        final userData = await _preferencesService.getUserObj();
+        if (userData != null) {
+          _currentUser = User(
+            id: 'persisted',
+            name: userData['name'] ?? '',
+            email: userData['email'] ?? '',
+            photoUrl: userData['photoUrl'],
+          );
+        }
+      } else {
+        _currentUser = null;
       }
     }
     notifyListeners();
@@ -48,7 +65,7 @@ class AuthProvider extends ChangeNotifier {
       final user = await _repository.login(email, password);
       _currentUser = user;
       await _preferencesService.setLoggedIn(true);
-      await _preferencesService.saveUserObj(user.name, user.email);
+      await _preferencesService.saveUserObj(user.name, user.email, user.photoUrl);
       return true;
     } catch (e) {
       _error = e.toString();
@@ -68,11 +85,70 @@ class AuthProvider extends ChangeNotifier {
       final user = await _repository.signUp(name, email, password, phone);
       _currentUser = user;
       await _preferencesService.setLoggedIn(true);
-      await _preferencesService.saveUserObj(user.name, user.email);
+      await _preferencesService.saveUserObj(user.name, user.email, user.photoUrl);
       return true;
     } catch (e) {
       _error = e.toString();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _repository.forgotPassword(email);
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateProfile({required String name, required String phone, String? photoUrl}) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      if (_currentUser == null) throw Exception('No user logged in');
+      
+      final updatedUser = User(
+        id: _currentUser!.id,
+        name: name,
+        email: _currentUser!.email,
+        phone: phone,
+        photoUrl: photoUrl ?? _currentUser!.photoUrl,
+      );
+      
+      final result = await _repository.updateProfile(updatedUser);
+      _currentUser = result;
+      await _preferencesService.saveUserObj(result.name, result.email, result.photoUrl);
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<String> uploadProfileImage(String filePath) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    
+    try {
+      return await _repository.uploadProfileImage(filePath);
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -49,6 +49,17 @@ class _SignupPageState extends State<SignupPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtEtsUskwsAA8AQmHkNx7JnTHx9yEmNMcwyA&s",
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, size: 80, color: Colors.blue),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,

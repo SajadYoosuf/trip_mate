@@ -36,4 +36,21 @@ class MockAuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     await Future.delayed(const Duration(seconds: 1));
   }
+  
+  @override
+  Future<User> updateProfile(User user) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return user;
+  }
+
+  @override
+  Future<String> uploadProfileImage(String filePath) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return 'https://via.placeholder.com/150';
+  }
+
+  @override
+  Future<User?> getCurrentUser() async {
+    return null;
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "535427867658",
+    "project_id": "travel-app-d8e3c",
+    "storage_bucket": "travel-app-d8e3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535427867658:android:41e8d932c20fd56029ebf3",
+        "android_client_info": {
+          "package_name": "com.example.temporal_zodiac"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6JQqd51L9z3SriF4MIzRAU6mDufHZ9X4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
