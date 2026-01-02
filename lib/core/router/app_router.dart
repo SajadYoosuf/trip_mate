@@ -92,6 +92,12 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
                 routes: [
                   GoRoute(
                     path: 'details',
+                    redirect: (context, state) {
+                      if (state.extra is! Place) {
+                         return '/home';
+                      }
+                      return null;
+                    },
                     builder: (context, state) {
                       final place = state.extra as Place;
                       return PlaceDetailsPage(place: place);

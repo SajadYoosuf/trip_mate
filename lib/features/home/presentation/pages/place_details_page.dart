@@ -4,11 +4,27 @@ import 'package:provider/provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/visited_provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/favorites_provider.dart';
 import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailsPage extends StatelessWidget {
   final Place place;
 
   const PlaceDetailsPage({super.key, required this.place});
+
+  Future<void> _launchMap() async {
+    if (place.latitude == null || place.longitude == null) return;
+
+    final Uri googleMapsUrl = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}');
+    
+    try {
+      if (!await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication)) {
+        throw 'Could not launch $googleMapsUrl';
+      }
+    } catch (e) {
+      debugPrint("Error launching map: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +48,7 @@ class PlaceDetailsPage extends StatelessWidget {
             top: MediaQuery.of(context).padding.top + 10,
             left: 16,
             child: CircleAvatar(
-              backgroundColor: Colors.white.withValues(alpha: 0.5),
+              backgroundColor: Colors.white.withOpacity(0.5),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
                 onPressed: () => Navigator.pop(context),
@@ -44,9 +60,20 @@ class PlaceDetailsPage extends StatelessWidget {
            Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 16,
-            child: CircleAvatar(
-              backgroundColor: Colors.white.withValues(alpha: 0.5),
-               backgroundImage: const NetworkImage("https://i.pravatar.cc/150?img=30"), // Placeholder or User Image
+            child: CachedNetworkImage(
+              imageUrl: "https://i.pravatar.cc/150?img=30",
+              imageBuilder: (context, imageProvider) => CircleAvatar(
+                backgroundColor: Colors.white.withOpacity(0.5),
+                backgroundImage: imageProvider,
+              ),
+              placeholder: (context, url) => CircleAvatar(
+                backgroundColor: Colors.white.withOpacity(0.5),
+                child: const Icon(Icons.person, color: Colors.black),
+              ),
+              errorWidget: (context, url, error) => CircleAvatar(
+                backgroundColor: Colors.white.withOpacity(0.5),
+                child: const Icon(Icons.person, color: Colors.black),
+              ),
             ),
           ),
 
@@ -66,7 +93,7 @@ class PlaceDetailsPage extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 10,
                       spreadRadius: 2,
                     )
@@ -126,6 +153,13 @@ class PlaceDetailsPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondary,
                               borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Row(
                               children: [
@@ -152,7 +186,7 @@ class PlaceDetailsPage extends StatelessWidget {
 
                       // Description
                       Text(
-                        "Descriptions",
+                        "Description",
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -190,8 +224,30 @@ class PlaceDetailsPage extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 16),
+                              
+                              // Directions Button
+                              Expanded(
+                                flex: 1,
+                                child: SizedBox(
+                                  height: 56,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _launchMap,
+                                    style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                                        foregroundColor: Theme.of(context).colorScheme.primary
+                                    ),
+                                    icon: const Icon(Icons.directions),
+                                    label: const Text("Directions"),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 16),
+                              
                               // Visited / Action Button
                               Expanded(
+                                flex: 1,
                                 child: SizedBox(
                                   height: 56,
                                   child: FilledButton(
@@ -199,11 +255,12 @@ class PlaceDetailsPage extends StatelessWidget {
                                       visitedProvider.toggleVisited(place);
                                     },
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: isVisited ? Colors.green : Theme.of(context).colorScheme.secondary,
+                                      backgroundColor: isVisited ? Colors.green : Theme.of(context).colorScheme.primary,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      elevation: 0,
                                     ),
                                     child: Text(
-                                      isVisited ? "Visited" : "Mark as Visited", 
+                                      isVisited ? "Visited" : "Check In", 
                                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                                     ),
                                   ),

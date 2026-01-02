@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:temporal_zodiac/features/home/presentation/providers/home_provider.dart';
@@ -59,13 +60,18 @@ class HomePage extends StatelessWidget {
                         ),
                         CircleAvatar(
                           radius: 20,
-                          backgroundImage: userPhoto != null 
-                              ? NetworkImage(userPhoto) 
-                              : null,
                           backgroundColor: Colors.grey[300],
-                          child: userPhoto == null 
-                              ? const Icon(Icons.person, color: Colors.grey) 
-                              : null,
+                          child: userPhoto != null 
+                              ? CachedNetworkImage(
+                                  imageUrl: userPhoto,
+                                  imageBuilder: (context, imageProvider) => CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage: imageProvider,
+                                  ),
+                                  placeholder: (context, url) => const Icon(Icons.person, color: Colors.grey),
+                                  errorWidget: (context, url, error) => const Icon(Icons.person, color: Colors.grey),
+                                )
+                              : const Icon(Icons.person, color: Colors.grey),
                         ),
                       ],
                     ),
