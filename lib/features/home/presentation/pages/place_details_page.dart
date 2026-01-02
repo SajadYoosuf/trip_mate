@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/visited_provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/favorites_provider.dart';
 import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
+import 'package:temporal_zodiac/features/trip/presentation/providers/trip_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailsPage extends StatelessWidget {
@@ -245,7 +246,7 @@ class PlaceDetailsPage extends StatelessWidget {
 
                               const SizedBox(width: 16),
                               
-                              // Visited / Action Button
+                              // Check In Button
                               Expanded(
                                 flex: 1,
                                 child: SizedBox(
@@ -261,7 +262,7 @@ class PlaceDetailsPage extends StatelessWidget {
                                     ),
                                     child: Text(
                                       isVisited ? "Visited" : "Check In", 
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
                                     ),
                                   ),
                                 ),
@@ -269,6 +270,20 @@ class PlaceDetailsPage extends StatelessWidget {
                             ],
                           );
                         },
+                      ),
+                      const SizedBox(height: 16),
+                      // Add to Trip Plan Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showAddToTripDialog(context),
+                          icon: const Icon(Icons.playlist_add),
+                          label: const Text("Add to Trip Plan"),
+                          style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                        ),
                       ),
                        const SizedBox(height: 24),
                     ],
@@ -280,5 +295,96 @@ class PlaceDetailsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showAddToTripDialog(BuildContext context) {
+      showModalBottomSheet(
+          context: context,
+          useRootNavigator: true,
+          isScrollControlled: true,
+          showDragHandle: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          builder: (context) {
+              return Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                          Text("Add to Trip Plan", style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          Consumer<TripProvider>(
+                              builder: (context, tripProvider, _) {
+                                  if (tripProvider.trips.isEmpty) {
+                                      return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 32.0),
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.luggage, size: 48, color: Colors.grey[400]),
+                                              const SizedBox(height: 16),
+                                              const Text("No trips created yet."),
+                                              TextButton(
+                                                onPressed: () { 
+                                                    Navigator.pop(context); // Close sheet
+                                                    // Navigate? The user is deep in details. 
+                                                    // Maybe show specific creation dialog here?
+                                                    // For now just info.
+                                                },
+                                                child: const Text("Go create one in Trip Plans tab"),
+                                              )
+                                            ],
+                                          ),
+                                      );
+                                  }
+                                  return ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxHeight: MediaQuery.of(context).size.height * 0.5,
+                                    ),
+                                    child: ListView.separated(
+                                        shrinkWrap: true,
+                                        itemCount: tripProvider.trips.length,
+                                        separatorBuilder: (_, __) => const Divider(),
+                                        itemBuilder: (context, index) {
+                                            final trip = tripProvider.trips[index];
+                                            final isAdded = trip.placeIds.contains(place.id); 
+                                            return ListTile(
+                                                leading: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).colorScheme.primaryContainer,
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(Icons.flight_takeoff, color: Theme.of(context).colorScheme.onPrimaryContainer), 
+                                                ),
+                                                title: Text(trip.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                subtitle: Text("${trip.placeIds.length} places • ${trip.memberIds.length} members"),
+                                                trailing: isAdded 
+                                                    ? Icon(Icons.check_circle, color: Colors.green[600]) 
+                                                    : const Icon(Icons.add_circle_outline),
+                                                onTap: () async {
+                                                    if (!isAdded) {
+                                                        await tripProvider.addPlaceToTrip(trip.id, place.id); 
+                                                        Navigator.pop(context);
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text("Added to ${trip.name}"),
+                                                              behavior: SnackBarBehavior.floating,
+                                                            )
+                                                        );
+                                                    }
+                                                },
+                                            );
+                                        }
+                                    ),
+                                  );
+                              }
+                          )
+                      ],
+                  ),
+              );
+          }
+      );
   }
 }

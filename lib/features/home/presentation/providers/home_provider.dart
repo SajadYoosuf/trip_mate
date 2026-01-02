@@ -30,21 +30,17 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Fetch mock popular places
-      final popularFuture = repository.getPopularPlaces();
-      
       // Fetch live nearby places
       List<Place> livePlaces = [];
       try {
         livePlaces = await _fetchLivePlaces();
       } catch (e) {
         debugPrint('Error fetching live places: $e');
-        // Fallback to mock if live fails
-        livePlaces = await repository.getNearbyPlaces();
+        livePlaces = []; // No mock fallback
       }
 
-      _popularPlaces = await popularFuture;
       _nearbyPlaces = livePlaces;
+      _popularPlaces = []; // No mock popular places
 
     } catch (e) {
       _error = "Failed to load places";

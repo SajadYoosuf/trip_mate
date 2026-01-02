@@ -25,6 +25,9 @@ import 'package:temporal_zodiac/features/favorites/data/repositories/visited_rep
 import 'package:temporal_zodiac/features/favorites/domain/repositories/visited_repository.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/visited_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:temporal_zodiac/features/trip/data/repositories/firestore_trip_repository_impl.dart';
+import 'package:temporal_zodiac/features/trip/domain/repositories/trip_repository.dart';
+import 'package:temporal_zodiac/features/trip/presentation/providers/trip_provider.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -119,6 +122,17 @@ class TravelMateApp extends StatelessWidget {
           create: (context) => VisitedProvider(
             context.read<VisitedRepository>(),
           )..loadVisitedPlaces(),
+        ),
+        Provider<TripRepository>(create: (_) => FirestoreTripRepositoryImpl()),
+        ChangeNotifierProxyProvider<AuthProvider, TripProvider>(
+          create: (context) => TripProvider(
+             context.read<TripRepository>(),
+             context.read<AuthProvider>().currentUser?.id ?? '',
+          ),
+          update: (context, auth, previous) => TripProvider(
+            context.read<TripRepository>(),
+            auth.currentUser?.id ?? '',
+          ),
         ),
       ],
       child: MaterialApp.router(

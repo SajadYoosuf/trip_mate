@@ -15,6 +15,8 @@ import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
 import 'package:temporal_zodiac/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:temporal_zodiac/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:temporal_zodiac/core/services/preferences_service.dart';
+import 'package:temporal_zodiac/features/trip/domain/entities/trip.dart';
+import 'package:temporal_zodiac/features/trip/presentation/pages/trip_details_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -128,6 +130,22 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
               GoRoute(
                 path: '/favorites',
                 builder: (context, state) => const FavoritesPage(),
+                routes: [
+                  GoRoute(
+                    path: 'trip',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    redirect: (context, state) {
+                      if (state.extra is! Trip) {
+                         return '/favorites';
+                      }
+                      return null;
+                    },
+                    builder: (context, state) {
+                      final trip = state.extra as Trip;
+                      return TripDetailsPage(trip: trip);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

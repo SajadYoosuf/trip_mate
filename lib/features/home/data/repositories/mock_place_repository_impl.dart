@@ -2,62 +2,54 @@ import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
 import 'package:temporal_zodiac/features/home/domain/repositories/place_repository.dart';
 
 class MockPlaceRepositoryImpl implements PlaceRepository {
+  final List<Place> _nearbyPlaces = [
+    const Place(
+      id: '1',
+      name: 'Silent Valley National Park',
+      description: 'A beautiful national park.',
+      imageUrl: 'https://images.unsplash.com/photo-1511497584788-876760111969',
+      distance: 12.5,
+      rating: 4.8,
+      type: 'Park',
+      latitude: 11.13,
+      longitude: 76.42,
+    ),
+    const Place(
+      id: '2',
+      name: 'Munnar Tea Gardens',
+      description: 'Lush green tea plantations.',
+      imageUrl: 'https://images.unsplash.com/photo-1596323067888-97cce305260f',
+      distance: 45.0,
+      rating: 4.9,
+      type: 'Nature',
+      latitude: 10.08,
+      longitude: 77.06,
+    ),
+  ];
+
+  final List<Place> _popularPlaces = [
+    const Place(
+      id: '3',
+      name: 'Alleppey Backwaters',
+      description: 'Famous backwaters of Kerala.',
+      imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944',
+      distance: 120.0,
+      rating: 4.7,
+      type: 'Water',
+      latitude: 9.49,
+      longitude: 76.33,
+    ),
+  ];
+
   @override
   Future<List<Place>> getNearbyPlaces() async {
-    await Future.delayed(const Duration(milliseconds: 800)); // Simulate latency
-    return [
-      const Place(
-        id: '1',
-        name: 'Central Park',
-        description: 'A beautiful green space in the heart of the city.',
-        imageUrl: 'https://images.unsplash.com/photo-1545620857-89bb55913f61?auto=format&fit=crop&q=80&w=800',
-        distance: 1.2,
-        rating: 4.8,
-        type: 'Park',
-      ),
-      const Place(
-        id: '2',
-        name: 'The Daily Grind',
-        description: 'Artisan coffee and pastries.',
-        imageUrl: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&q=80&w=800',
-        distance: 0.5,
-        rating: 4.5,
-        type: 'Cafe',
-      ),
-       const Place(
-        id: '3',
-        name: 'City Museum',
-        description: 'Explore the history of the region.',
-        imageUrl: 'https://images.unsplash.com/photo-1566085775798-8422aa52c1fe?auto=format&fit=crop&q=80&w=800',
-        distance: 2.1,
-        rating: 4.6,
-        type: 'Museum',
-      ),
-    ];
+    await Future.delayed(const Duration(milliseconds: 500));
+    return _nearbyPlaces;
   }
 
   @override
   Future<List<Place>> getPopularPlaces() async {
-    await Future.delayed(const Duration(milliseconds: 1000));
-    return [
-      const Place(
-        id: '4',
-        name: 'Golden Gate Bridge',
-        description: 'Iconic suspension bridge.',
-        imageUrl: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&q=80&w=800',
-        distance: 5.5,
-        rating: 4.9,
-        type: 'Landmark',
-      ),
-       const Place(
-        id: '5',
-        name: 'Ocean Beach',
-        description: 'Wide sandy beach with great waves.',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800',
-        distance: 8.0,
-        rating: 4.7,
-        type: 'Beach',
-      ),
-    ];
+    await Future.delayed(const Duration(milliseconds: 500));
+    return _popularPlaces;
   }
 }

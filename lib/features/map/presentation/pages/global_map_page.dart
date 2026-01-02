@@ -94,7 +94,8 @@ class _GlobalMapPageState extends State<GlobalMapPage> {
     }
 
     // Add Places Markers (Custom Image Markers)
-    for (final place in homeProvider.nearbyPlaces) {
+    final allPlaces = [...homeProvider.nearbyPlaces, ...homeProvider.popularPlaces];
+    for (final place in allPlaces) {
       if (place.latitude != null && place.longitude != null) {
         markers.add(
           Marker(

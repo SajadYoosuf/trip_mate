@@ -39,7 +39,7 @@ class PlaceModel extends Place {
     }
 
     return PlaceModel(
-      id: formattedAddress,
+      id: json['name'] as String? ?? formattedAddress,
       name: displayName,
       description: formattedAddress,
       imageUrl: imageUrl, 

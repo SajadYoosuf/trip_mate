@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/favorites_provider.dart';
 import 'package:temporal_zodiac/features/favorites/presentation/providers/recents_provider.dart';
 import 'package:temporal_zodiac/features/home/presentation/widgets/place_card.dart';
+import 'package:temporal_zodiac/features/trip/presentation/pages/trip_list_page.dart';
 import 'package:go_router/go_router.dart';
 
 class FavoritesPage extends StatelessWidget {
@@ -14,11 +15,11 @@ class FavoritesPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('My Places'),
+          title: const Text('My Places & Trips'),
           bottom: const TabBar(
             tabs: [
               Tab(text: "Saved"),
-              Tab(text: "Recent"),
+              Tab(text: "Trip Plans"),
             ],
           ),
         ),
@@ -46,27 +47,8 @@ class FavoritesPage extends StatelessWidget {
                 );
               },
             ),
-            // Recents Tab
-            Consumer<RecentsProvider>(
-              builder: (context, provider, child) {
-                if (provider.recents.isEmpty) {
-                   return const Center(child: Text("No recent places"));
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: provider.recents.length,
-                  itemBuilder: (context, index) {
-                    final place = provider.recents[index];
-                    return PlaceCard(
-                      place: place,
-                      onTap: () {
-                         context.go('/home/details', extra: place);
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+            // Trip Plans Tab
+            const TripListPage(),
           ],
         ),
       ),
