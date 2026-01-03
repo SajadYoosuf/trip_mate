@@ -15,6 +15,9 @@ import 'package:temporal_zodiac/features/home/domain/entities/place.dart';
 import 'package:temporal_zodiac/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:temporal_zodiac/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:temporal_zodiac/core/services/preferences_service.dart';
+import 'package:temporal_zodiac/features/trip/presentation/pages/map/trip_map_page.dart';
+import 'package:temporal_zodiac/features/trip/presentation/pages/chat/trip_chat_page.dart';
+
 import 'package:temporal_zodiac/features/trip/domain/entities/trip.dart';
 import 'package:temporal_zodiac/features/trip/presentation/pages/trip_details_page.dart';
 
@@ -144,6 +147,18 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
                       final trip = state.extra as Trip;
                       return TripDetailsPage(trip: trip);
                     },
+                    routes: [
+                       GoRoute(
+                          path: 'map',
+                          parentNavigatorKey: _rootNavigatorKey,
+                          builder: (context, state) => TripMapPage(trip: state.extra as Trip),
+                       ),
+                       GoRoute(
+                          path: 'chat',
+                          parentNavigatorKey: _rootNavigatorKey,
+                          builder: (context, state) => TripChatPage(trip: state.extra as Trip),
+                       ),
+                    ],
                   ),
                 ],
               ),

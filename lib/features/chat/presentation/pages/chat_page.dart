@@ -107,6 +107,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   const SizedBox(width: 8),
                   FloatingActionButton.small(
+                    heroTag: "ai_chat_send_fab",
                     onPressed: () =>
                         _handleSubmitted(_controller.text, provider),
                     child: const Icon(Icons.send),

@@ -210,6 +210,7 @@ class _GlobalMapPageState extends State<GlobalMapPage> {
             bottom: 100, // Above potentially custom bottom nav
              right: 20,
             child: FloatingActionButton(
+              heroTag: "global_map_fab",
               onPressed: _determinePosition,
               backgroundColor: Theme.of(context).colorScheme.surface,
               child: Icon(Icons.my_location, color: Theme.of(context).colorScheme.primary),

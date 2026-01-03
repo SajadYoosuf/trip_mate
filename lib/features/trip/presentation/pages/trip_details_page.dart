@@ -48,6 +48,7 @@ class TripDetailsPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+          heroTag: "trip_details_invite_fab",
           onPressed: () {
                _showInviteFriendDialog(context);
           },
@@ -63,6 +64,35 @@ class TripDetailsPage extends StatelessWidget {
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                   // Live Location Toggle
+                  Consumer<TripProvider>(
+                    builder: (context, provider, child) {
+                      final user = context.read<AuthProvider>().currentUser;
+                      return SwitchListTile(
+                        title: const Text("Share Live Location"),
+                        subtitle: Text(provider.isLiveLocationEnabled ? "You are visible on the map" : "Enable to see/be seen on map"),
+                        value: provider.isLiveLocationEnabled,
+                        secondary: Icon(provider.isLiveLocationEnabled ? Icons.location_on : Icons.location_off, 
+                                      color: provider.isLiveLocationEnabled ? Colors.green : Colors.grey),
+                        onChanged: (val) {
+                           if (val) {
+                             provider.startLiveLocation(
+                               trip.id,
+                               userName: user?.name ?? 'Unknown',
+                               userPhotoUrl: user?.photoUrl
+                             );
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Sharing live location...")));
+                           } else {
+                             provider.stopLiveLocation();
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Stopped sharing location")));
+                           }
+                        },
+                      );
+                    },
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
                   Text("Trip Members (${trip.memberIds.length})", style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   SizedBox(

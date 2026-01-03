@@ -3,6 +3,7 @@ import 'package:temporal_zodiac/features/trip/domain/entities/trip_request.dart'
 import 'package:temporal_zodiac/features/auth/domain/entities/user.dart';
 
 import 'package:temporal_zodiac/features/trip/domain/entities/trip_member_location.dart';
+import 'package:temporal_zodiac/features/trip/domain/entities/trip_chat_message.dart';
 
 abstract class TripRepository {
   // Trips
@@ -21,6 +22,10 @@ abstract class TripRepository {
   Future<List<User>> searchUsers(String query);
 
   // Live Location
-  Future<void> updateMemberLocation(String tripId, String userId, double lat, double lng);
+  Future<void> updateMemberLocation(String tripId, String userId, double lat, double lng, {String? userName, String? userPhotoUrl});
   Stream<List<TripMemberLocation>> getTripLocationsStream(String tripId);
+
+  // Group Chat
+  Future<void> sendTripMessage(String tripId, String message, String senderId, String senderName);
+  Stream<List<TripChatMessage>> getTripMessagesStream(String tripId);
 }

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:temporal_zodiac/features/trip/domain/entities/trip_member_location.dart';
 import 'package:temporal_zodiac/features/auth/domain/entities/user.dart';
 import 'package:temporal_zodiac/features/trip/domain/entities/trip.dart';
+import 'package:temporal_zodiac/features/trip/domain/entities/trip_chat_message.dart';
 import 'package:temporal_zodiac/features/trip/domain/entities/trip_request.dart';
 import 'package:temporal_zodiac/features/trip/domain/repositories/trip_repository.dart';
 
@@ -122,7 +123,7 @@ class TripProvider extends ChangeNotifier {
   List<TripMemberLocation> get memberLocations => _memberLocations;
   bool get isLiveLocationEnabled => _isLiveLocationEnabled;
 
-  Future<void> startLiveLocation(String tripId) async {
+  Future<void> startLiveLocation(String tripId, {String? userName, String? userPhotoUrl}) async {
     if (_isLiveLocationEnabled) return;
 
     // 1. Permission check
@@ -145,7 +146,14 @@ class TripProvider extends ChangeNotifier {
     _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen((Position? position) {
       if (position != null) {
-        _repository.updateMemberLocation(tripId, _currentUserId, position.latitude, position.longitude);
+        _repository.updateMemberLocation(
+            tripId, 
+            _currentUserId, 
+            position.latitude, 
+            position.longitude,
+            userName: userName,
+            userPhotoUrl: userPhotoUrl
+        );
       }
     });
 
@@ -166,5 +174,32 @@ class TripProvider extends ChangeNotifier {
     _membersLocationSubscription?.cancel();
     _membersLocationSubscription = null;
     notifyListeners();
+  }
+
+  // --- Group Chat ---
+  List<TripChatMessage> _tripMessages = [];
+  StreamSubscription<List<TripChatMessage>>? _messagesSubscription;
+  List<TripChatMessage> get tripMessages => _tripMessages;
+
+  void listenToMessages(String tripId) {
+    _messagesSubscription?.cancel();
+    _messagesSubscription = _repository.getTripMessagesStream(tripId).listen((messages) {
+      _tripMessages = messages;
+      notifyListeners();
+    }, onError: (e) {
+      debugPrint("Chat Stream Error: $e");
+    });
+  }
+
+  void stopListeningToMessages() {
+    _messagesSubscription?.cancel();
+    _messagesSubscription = null;
+    _tripMessages = []; // Clear messages
+    notifyListeners();
+  }
+
+  Future<void> sendMessage(String tripId, String message, String senderName) async {
+    if (message.trim().isEmpty) return;
+    await _repository.sendTripMessage(tripId, message.trim(), _currentUserId, senderName);
   }
 }

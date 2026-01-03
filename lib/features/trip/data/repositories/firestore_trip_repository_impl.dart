@@ -5,6 +5,7 @@ import 'package:temporal_zodiac/features/trip/data/models/trip_request_model.dar
 import 'package:temporal_zodiac/features/trip/domain/entities/trip.dart';
 import 'package:temporal_zodiac/features/trip/domain/entities/trip_request.dart';
 import 'package:temporal_zodiac/features/trip/domain/repositories/trip_repository.dart';
+import 'package:temporal_zodiac/features/trip/domain/entities/trip_chat_message.dart';
 import 'package:temporal_zodiac/features/trip/domain/entities/trip_member_location.dart';
 
 class FirestoreTripRepositoryImpl implements TripRepository {
@@ -147,18 +148,22 @@ class FirestoreTripRepositoryImpl implements TripRepository {
   // --- Live Location ---
 
   @override
-  Future<void> updateMemberLocation(String tripId, String userId, double lat, double lng) async {
+  Future<void> updateMemberLocation(String tripId, String userId, double lat, double lng, {String? userName, String? userPhotoUrl}) async {
+    final data = {
+      'userId': userId,
+      'latitude': lat,
+      'longitude': lng,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+    if (userName != null) data['userName'] = userName;
+    if (userPhotoUrl != null) data['userPhotoUrl'] = userPhotoUrl;
+    
     await _firestore
         .collection('trips')
         .doc(tripId)
         .collection('locations')
         .doc(userId)
-        .set({
-      'userId': userId,
-      'latitude': lat,
-      'longitude': lng,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+        .set(data, SetOptions(merge: true));
   }
 
   @override
@@ -173,10 +178,41 @@ class FirestoreTripRepositoryImpl implements TripRepository {
         final data = doc.data();
         return TripMemberLocation(
             userId: data['userId'],
+            userName: data['userName'],
+            userPhotoUrl: data['userPhotoUrl'],
             latitude: (data['latitude'] as num).toDouble(),
             longitude: (data['longitude'] as num).toDouble(),
             timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now());
       }).toList();
     });
+  }
+
+  // --- Group Chat ---
+
+  @override
+  Future<void> sendTripMessage(String tripId, String message, String senderId, String senderName) async {
+    await _firestore
+        .collection('trips')
+        .doc(tripId)
+        .collection('messages')
+        .add({
+      'senderId': senderId,
+      'senderName': senderName,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Stream<List<TripChatMessage>> getTripMessagesStream(String tripId) {
+    return _firestore
+        .collection('trips')
+        .doc(tripId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => TripChatMessage.fromSnapshot(doc))
+            .toList());
   }
 }
