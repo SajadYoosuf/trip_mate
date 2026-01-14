@@ -268,7 +268,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   Widget _buildInfoTab(User user, bool isLoading) {
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
       child: Column(
         children: [
           if (_isEditing) ...[
@@ -383,7 +383,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           );
         }
         return MasonryGridView.count(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,

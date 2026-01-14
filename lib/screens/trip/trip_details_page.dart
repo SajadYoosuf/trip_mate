@@ -23,13 +23,13 @@ class TripDetailsPage extends StatelessWidget {
             IconButton(
                 icon: const Icon(Icons.map),
                 onPressed: () {
-                    context.push('/favorites/trip/map', extra: trip);
+                    context.push('/profile/favorites/trip/map', extra: trip);
                 },
             ),
             IconButton(
                 icon: const Icon(Icons.chat),
                 onPressed: () {
-                    context.push('/favorites/trip/chat', extra: trip);
+                    context.push('/profile/favorites/trip/chat', extra: trip);
                 },
             )
         ],
@@ -47,13 +47,16 @@ class TripDetailsPage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 112), // Slightly higher to clear the custom nav bar beautifully
+        child: FloatingActionButton.extended(
           heroTag: "trip_details_invite_fab",
           onPressed: () {
-               _showInviteFriendDialog(context);
+            _showInviteFriendDialog(context);
           },
           icon: const Icon(Icons.person_add),
           label: const Text("Invite Friend"),
+        ),
       ),
     );
   }
@@ -166,7 +169,7 @@ class TripDetailsPage extends StatelessWidget {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                     child: InkWell(
                                       onTap: () {
-                                         Navigator.push(context, MaterialPageRoute(builder: (_) => PlaceDetailsPage(place: place)));
+                                         context.push('/home/details', extra: place);
                                       },
                                       child: Row(
                                         children: [
