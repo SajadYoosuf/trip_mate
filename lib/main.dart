@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:temporal_zodiac/core/router/app_router.dart';
-import 'package:temporal_zodiac/core/services/preferences_service.dart';
-import 'package:temporal_zodiac/core/theme/app_theme.dart';
+import 'package:temporal_zodiac/core/app_router.dart';
+import 'package:temporal_zodiac/services/preferences_service.dart';
+import 'package:temporal_zodiac/core/app_theme.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:temporal_zodiac/features/auth/data/repositories/firebase_auth_repository_impl.dart';
-import 'package:temporal_zodiac/features/auth/presentation/providers/auth_provider.dart';
-import 'package:temporal_zodiac/features/home/data/repositories/mock_place_repository_impl.dart';
-import 'package:temporal_zodiac/features/home/domain/repositories/place_repository.dart';
-import 'package:temporal_zodiac/features/home/data/repositories/google_places_repository_impl.dart';
-import 'package:temporal_zodiac/features/home/domain/repositories/places_repository.dart';
-import 'package:temporal_zodiac/features/home/presentation/providers/home_provider.dart';
-import 'package:temporal_zodiac/features/chat/data/repositories/gemini_chat_repository_impl.dart';
-import 'package:temporal_zodiac/features/chat/domain/repositories/chat_repository.dart';
-import 'package:temporal_zodiac/features/chat/presentation/providers/chat_provider.dart';
-import 'package:temporal_zodiac/features/favorites/data/models/place_hive_model.dart';
-import 'package:temporal_zodiac/features/favorites/data/repositories/favorites_repository_impl.dart';
-import 'package:temporal_zodiac/features/favorites/domain/repositories/favorites_repository.dart';
-import 'package:temporal_zodiac/features/favorites/presentation/providers/favorites_provider.dart';
-import 'package:temporal_zodiac/features/favorites/data/repositories/recents_repository_impl.dart';
-import 'package:temporal_zodiac/features/favorites/domain/repositories/recents_repository.dart';
-import 'package:temporal_zodiac/features/favorites/presentation/providers/recents_provider.dart';
-import 'package:temporal_zodiac/features/favorites/data/repositories/visited_repository_impl.dart';
-import 'package:temporal_zodiac/features/favorites/domain/repositories/visited_repository.dart';
-import 'package:temporal_zodiac/features/favorites/presentation/providers/visited_provider.dart';
+import 'package:temporal_zodiac/services/auth/firebase_auth_repository_impl.dart';
+import 'package:temporal_zodiac/services/leaderboard/leaderboard_service.dart';
+import 'package:temporal_zodiac/providers/leaderboard_provider.dart';
+import 'package:temporal_zodiac/providers/auth_provider.dart';
+import 'package:temporal_zodiac/services/home/google_places_repository_impl.dart';
+import 'package:temporal_zodiac/services/home/places_repository.dart';
+import 'package:temporal_zodiac/providers/home_provider.dart';
+import 'package:temporal_zodiac/services/chat/gemini_chat_repository_impl.dart';
+import 'package:temporal_zodiac/services/chat/chat_repository.dart';
+import 'package:temporal_zodiac/providers/chat_provider.dart';
+import 'package:temporal_zodiac/models/place_hive_model.dart';
+import 'package:temporal_zodiac/services/favorites/favorites_repository_impl.dart';
+import 'package:temporal_zodiac/services/favorites/favorites_repository.dart';
+import 'package:temporal_zodiac/providers/favorites_provider.dart';
+import 'package:temporal_zodiac/services/favorites/recents_repository_impl.dart';
+import 'package:temporal_zodiac/services/favorites/recents_repository.dart';
+import 'package:temporal_zodiac/providers/recents_provider.dart';
+import 'package:temporal_zodiac/services/favorites/visited_repository_impl.dart';
+import 'package:temporal_zodiac/services/favorites/visited_repository.dart';
+import 'package:temporal_zodiac/providers/visited_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:temporal_zodiac/features/trip/data/repositories/firestore_trip_repository_impl.dart';
-import 'package:temporal_zodiac/features/trip/domain/repositories/trip_repository.dart';
-import 'package:temporal_zodiac/features/trip/presentation/providers/trip_provider.dart';
+import 'package:temporal_zodiac/services/trip/firestore_trip_repository_impl.dart';
+import 'package:temporal_zodiac/services/trip/trip_repository.dart';
+import 'package:temporal_zodiac/providers/trip_provider.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -87,8 +87,8 @@ class TravelMateApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: authProvider),
-        Provider<PlaceRepository>(create: (_) => MockPlaceRepositoryImpl()),
         Provider<PlacesRepository>(create: (_) => GooglePlacesRepositoryImpl()),
+        Provider<LeaderboardService>(create: (_) => LeaderboardService()),
         Provider<ChatRepository>(create: (_) => GeminiChatRepositoryImpl()),
         Provider<FavoritesRepository>(
             create: (_) => FavoritesRepositoryImpl(favoritesBox)),
@@ -96,7 +96,6 @@ class TravelMateApp extends StatelessWidget {
             create: (_) => RecentsRepositoryImpl(recentsBox)),
         ChangeNotifierProvider(
           create: (context) => HomeProvider(
-            repository: context.read<PlaceRepository>(),
             googlePlacesRepository: context.read<PlacesRepository>(),
           )..loadPlaces(),
         ),
@@ -110,6 +109,11 @@ class TravelMateApp extends StatelessWidget {
           create: (context) => FavoritesProvider(
             repository: context.read<FavoritesRepository>(),
           )..loadFavorites(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LeaderboardProvider(
+            context.read<LeaderboardService>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => RecentsProvider(
