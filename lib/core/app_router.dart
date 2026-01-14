@@ -14,6 +14,7 @@ import 'package:temporal_zodiac/screens/home/place_details_page.dart';
 import 'package:temporal_zodiac/models/place.dart';
 import 'package:temporal_zodiac/screens/onboarding/splash_screen.dart';
 import 'package:temporal_zodiac/screens/onboarding/onboarding_page.dart';
+import 'package:temporal_zodiac/screens/onboarding/animated_splash_screen.dart';
 import 'package:temporal_zodiac/services/preferences_service.dart';
 import 'package:temporal_zodiac/screens/trip/trip_map_page.dart';
 import 'package:temporal_zodiac/screens/trip/trip_chat_page.dart';
@@ -28,20 +29,20 @@ final GlobalKey<NavigatorState> _rootNavigatorKey =
 GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: '/',
     refreshListenable: authProvider,
     redirect: (context, state) async {
       final isOnboardingCompleted = await prefs.isOnboardingCompleted();
       final isLoggedIn = authProvider.isAuthenticated;
       
-      final isGoingToSplash = state.matchedLocation == '/splash';
+      final isGoingToRoot = state.matchedLocation == '/';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToForgotPassword = state.matchedLocation == '/forgot_password';
       
-      // 0. Always allow splash to run its course first
-      if (isGoingToSplash) return null;
+      // 0. Always allow root (AnimatedSplashScreen) to run its course first
+      if (isGoingToRoot) return null;
 
       // 1. If onboarding not completed, go to onboarding
       if (!isOnboardingCompleted) {
@@ -66,8 +67,8 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
     },
     routes: [
       GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        path: '/',
+        builder: (context, state) => const AnimatedSplashScreen(),
       ),
       GoRoute(
         path: '/onboarding',
@@ -124,14 +125,6 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/leaderboard',
-                builder: (context, state) => const LeaderboardPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: '/chat',
                 builder: (context, state) => const ChatPage(),
               ),
@@ -140,36 +133,8 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/favorites',
-                builder: (context, state) => const FavoritesPage(),
-                routes: [
-                  GoRoute(
-                    path: 'trip',
-                    parentNavigatorKey: _rootNavigatorKey,
-                    redirect: (context, state) {
-                      if (state.extra is! Trip) {
-                         return '/favorites';
-                      }
-                      return null;
-                    },
-                    builder: (context, state) {
-                      final trip = state.extra as Trip;
-                      return TripDetailsPage(trip: trip);
-                    },
-                    routes: [
-                       GoRoute(
-                          path: 'map',
-                          parentNavigatorKey: _rootNavigatorKey,
-                          builder: (context, state) => TripMapPage(trip: state.extra as Trip),
-                       ),
-                       GoRoute(
-                          path: 'chat',
-                          parentNavigatorKey: _rootNavigatorKey,
-                          builder: (context, state) => TripChatPage(trip: state.extra as Trip),
-                       ),
-                    ],
-                  ),
-                ],
+                path: '/leaderboard',
+                builder: (context, state) => const LeaderboardPage(),
               ),
             ],
           ),
@@ -178,6 +143,39 @@ GoRouter createRouter(AuthProvider authProvider, PreferencesService prefs) {
               GoRoute(
                 path: '/profile',
                 builder: (context, state) => const ProfilePage(),
+                routes: [
+                  GoRoute(
+                    path: 'favorites',
+                    builder: (context, state) => const FavoritesPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'trip',
+                        redirect: (context, state) {
+                          if (state.extra is! Trip) {
+                            return '/profile';
+                          }
+                          return null;
+                        },
+                        builder: (context, state) {
+                          final trip = state.extra as Trip;
+                          return TripDetailsPage(trip: trip);
+                        },
+                        routes: [
+                          GoRoute(
+                            path: 'map',
+                            builder: (context, state) =>
+                                TripMapPage(trip: state.extra as Trip),
+                          ),
+                          GoRoute(
+                            path: 'chat',
+                            builder: (context, state) =>
+                                TripChatPage(trip: state.extra as Trip),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

@@ -112,10 +112,9 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
             children: [
               _buildNavItem(context, 0, Icons.home_rounded),
               _buildNavItem(context, 1, Icons.map_rounded),
-              _buildNavItem(context, 2, Icons.emoji_events_rounded),
-              _buildCenterNavItem(context, 3, Icons.chat_bubble_outline),
-              _buildNavItem(context, 4, Icons.favorite_rounded),
-              _buildNavItem(context, 5, Icons.person_rounded),
+              _buildCenterNavItem(context, 2, Icons.chat_bubble_outline),
+              _buildNavItem(context, 3, Icons.emoji_events_rounded),
+              _buildNavItem(context, 4, Icons.person_rounded),
             ],
           ),
         ),
@@ -151,7 +150,7 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
                            Navigator.pop(context);
                            _isDialogShowing = false;
                            // Navigate to trips tab
-                           widget.navigationShell.goBranch(4); // Favorites/Trips Tab
+                           context.push('/profile/favorites');
                       }, 
                       child: const Text("Accept")
                   ),

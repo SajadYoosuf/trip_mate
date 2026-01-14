@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:temporal_zodiac/providers/visited_provider.dart';
 import 'package:temporal_zodiac/providers/leaderboard_provider.dart';
+import 'package:temporal_zodiac/providers/favorites_provider.dart';
 import 'package:temporal_zodiac/providers/trip_provider.dart';
 import 'package:temporal_zodiac/providers/auth_provider.dart';
 import 'package:temporal_zodiac/models/place.dart';

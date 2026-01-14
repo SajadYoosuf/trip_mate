@@ -123,7 +123,7 @@ class TripListPage extends StatelessWidget {
                 ),
                 trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
                 onTap: () {
-                  context.go('/favorites/trip', extra: trip);
+                  context.push('/profile/favorites/trip', extra: trip);
                 },
               ),
             );
